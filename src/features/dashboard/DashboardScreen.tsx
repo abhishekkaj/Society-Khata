@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, SafeAre
 import { useStore } from '../../core/store/useStore';
 import { theme } from '../../core/design/theme';
 import { Wallet, Users, FileText, MessageCircle, PlusCircle, CheckCircle } from 'lucide-react-native';
+import { generateLedgerPDF } from '../../core/utils/pdfService';
 
 const MetricCard = ({ title, value, color }: { title: string, value: string, color: string }) => (
   <View style={[styles.card, { borderTopWidth: 4, borderTopColor: color }]}>
@@ -97,7 +98,10 @@ export const DashboardScreen = () => {
           <Wallet color={theme.colors.textPrimary} size={24} />
           <Text style={styles.actionText}>Add Expense</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity 
+          style={styles.actionBtn}
+          onPress={() => generateLedgerPDF(activeSociety, members, metrics)}
+        >
           <FileText color={theme.colors.textPrimary} size={24} />
           <Text style={styles.actionText}>PDF Report</Text>
         </TouchableOpacity>
