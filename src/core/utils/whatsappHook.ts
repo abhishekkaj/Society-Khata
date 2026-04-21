@@ -1,29 +1,47 @@
-import { Linking, Platform } from 'react-native';
+import { Linking, Alert } from 'react-native';
 
-const VIRAL_HOOK = '\n\n---\n*Generated via Society Khata📱*\nFree zero-latency society management.\nDownload: bit.ly/society-khata';
+export const shareWhatsAppReminder = async (
+  rawPhone: string,
+  memberName: string,
+  amount: number,
+  flatNumber: string
+) => {
+  // 1. Aggressive Number Sanitization
+  // Strip all spaces, dashes, parentheses, and the + symbol
+  let sanitizedNumber = rawPhone.replace(/[\s\-()+]/g, '');
 
-export const shareWhatsAppReminder = async (phone: string, memberName: string, amount: number, flat: string) => {
-  // Format the text using WhatsApp specific formatting (* for bold)
-  const message = `Hello *${memberName}* (Flat ${flat}),\n\nThis is a gentle reminder that your society maintenance of *₹${amount}* is currently pending.\nWe request you to kindly clear the dues at your earliest convenience.` + VIRAL_HOOK;
+  // If it's precisely a 10-digit Indian number, prepend 91
+  if (sanitizedNumber.length === 10) {
+    sanitizedNumber = `91${sanitizedNumber}`;
+  } else if (sanitizedNumber.startsWith('0') && sanitizedNumber.length === 11) {
+    // Handle cases where users prefix with 0
+    sanitizedNumber = `91${sanitizedNumber.substring(1)}`;
+  }
 
-  // Clean phone number
-  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  // 2. Message Generation
+  const message = `Namaskaram ${memberName} (Flat ${flatNumber}),
   
-  let url = `whatsapp://send?text=${encodeURIComponent(message)}&phone=${cleanPhone}`;
+This is a gentle reminder regarding the pending society maintenance dues of ₹${amount.toLocaleString()}. 
+Kindly clear the dues at your earliest convenience to help us maintain our community services uninterrupted.
+
+Generated via Society Khata 📱 | Community Finance, Simplified.`;
+
+  // Wrap payload in strict URI encoding
+  const encodedMessage = encodeURIComponent(message);
   
+  // 3. Universal Scheme Routing (Bypassing android `<queries>` block logic)
+  const universalUrl = `https://wa.me/${sanitizedNumber}?text=${encodedMessage}`;
+
+  // 4. Bulletproof Execution Sequence
   try {
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      return Linking.openURL(url);
-    } else {
-      // Fallback if WhatsApp is not installed
-      if (Platform.OS === 'web') {
-        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
-      } else {
-        console.warn('WhatsApp is not installed on the device');
-      }
-    }
-  } catch (err) {
-    console.error('Error opening WhatsApp', err);
+    // Try opening the universal link (which falls back natively to browsers if the app is missing but works perfectly if app is installed)
+    await Linking.openURL(universalUrl);
+  } catch (error) {
+    // Silently catch OS-level intent failures and alert the user cleanly
+    console.error('WhatsApp routing intent failed', error);
+    Alert.alert(
+      'WhatsApp Error',
+      'Could not open WhatsApp. Please ensure it is installed on your device or you have an active internet connection to fall back to the browser.'
+    );
   }
 };
