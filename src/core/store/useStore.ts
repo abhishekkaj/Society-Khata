@@ -40,7 +40,7 @@ export const useStore = create<KhataState>((set, get) => ({
     if (!activeSociety) return;
 
     // 1. Optimistic UI Update: Create a temporary member
-    const tempId = Date.now();
+    const tempId = Date.now() + Math.floor(Math.random() * 100000);
     const tempMember: Member = {
       id: tempId,
       society_id: activeSociety.id,

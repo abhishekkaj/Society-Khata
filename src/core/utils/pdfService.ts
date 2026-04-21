@@ -75,6 +75,23 @@ export const generateLedgerPDF = async (society: Society, members: Member[], met
     const { uri } = await Print.printToFileAsync({ html });
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri);
+      
+      // Simulate Interstitial Verification & Dopamine Hit
+      setTimeout(() => {
+        // eslint-disable-next-line no-undef
+        if (typeof alert !== 'undefined') {
+          // Web fallback
+          alert('AdMob Interstitial Ad would play here (Mocked for Expo)');
+        } else {
+          try {
+            const { Alert } = require('react-native');
+            Alert.alert(
+              'PDF Generated Successfully!',
+              '[AdMob Interstitial Triggered] Sponsored by DigitalEagle.'
+            );
+          } catch (e) {}
+        }
+      }, 500);
     }
   } catch (error) {
     console.error('PDF Generation failed', error);
